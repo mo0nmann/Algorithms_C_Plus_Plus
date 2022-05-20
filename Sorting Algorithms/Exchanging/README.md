@@ -1,1 +1,1 @@
-# Exhanging Sort Algorithms
+# Exchanging Sort Algorithms
