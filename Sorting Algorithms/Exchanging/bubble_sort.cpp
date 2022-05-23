@@ -46,11 +46,27 @@ void printComparison(std::vector<int> unsorted_vector, std::vector<int> sorted_v
     std::cout << "]" << std::endl;
 }
 
+// bubble sort algorithm
+void bubbleSort(std::vector<int> *vec) {
+
+    bool ordered = false;
+
+    for (int i = 0; (i < vec->size()) && (!ordered); i++) {
+        ordered = true;
+        for (int j = 0; j < vec->size() - i - 1; j++) {
+            
+            if (vec->at(j) > vec->at(j + 1)) {
+                std::swap(vec->at(j), vec->at(j + 1));
+                ordered = false;
+            }
+
+        }
+    }
+}
 
 int main() {
     
     int vector_size;
-    bool ordered = false;
 
     std::cout << "Enter the amount of numbers to sort: ";
     std::cin >> vector_size;
@@ -60,17 +76,7 @@ int main() {
     std::vector<int> sorted_vector = unsorted_vector;
 
     // bubble sort
-    for (int i = 0; (i < sorted_vector.size()) && (!ordered); i++) {
-        ordered = true;
-        for (int j = 0; j < sorted_vector.size() - i - 1; j++) {
-            
-            if (sorted_vector[j] > sorted_vector[j + 1]) {
-                std::swap(sorted_vector[j], sorted_vector[j + 1]);
-                ordered = false;
-            }
-
-        }
-    }
+    bubbleSort(&sorted_vector);
 
     // output
     printComparison(unsorted_vector, sorted_vector);
