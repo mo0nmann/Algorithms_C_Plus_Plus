@@ -8,7 +8,7 @@ Below is a table outlining the details of each algorithm
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **Bubble Sort**  | *O(n<sup>2</sup>)*  |  *Ω(n<sup>2</sup>)* | *Θ(n)*  |  *O(1)* | Yes  |
 | **Cocktail Shaker Sort**  | *O(n<sup>2</sup>)*  | *Ω(n<sup>2</sup>)*  | *Θ(n)*  |  *O(1)* | Yes  |
-| **Comb Sort**  |  *O(n<sup>2</sup>)* |  *Ω(n<sup>2</sup>/2<sup>p</sup>)*, <sup> where p is the  number of increments</sup> | *Θ(n log n)*  | *O(1)*  | No |
+| **Comb Sort**  |  *O(n<sup>2</sup>)* |  *Ω(n<sup>2</sup>/2<sup>p</sup>)*, where p is the  number of increments | *Θ(n log n)*  | *O(1)*  | No |
 |   **Exchange Sort** |  *O(n<sup>2</sup>)* | *Ω(n<sup>2</sup>)*  |  *Θ(n<sup>2</sup>)* |  *O(1)* |   Yes|
 |   **Gnome Sort** |  *O(n<sup>2</sup>)* |  *Ω(n<sup>2</sup>)* |  *Θ(n)* |  *O(1)* |  Yes |
 |  **Odd-Even Sort** | *O(n<sup>2</sup>)*  |  *O(n<sup>2</sup>)* |  *Θ(n)* | *O(1)*  |  Yes |
