@@ -1,4 +1,4 @@
-#include <random> 
+#include <random> 
 #include <algorithm> 
 #include <iterator> 
 #include <iostream> 
@@ -49,24 +49,26 @@ void printComparison(std::vector<int> unsorted_vector, std::vector<int> sorted_v
   
   
 int main() { 
-      
+ 
     int vector_size; 
     bool sorted = false;
-
-    int low = 0;
-    int high = vector_size - 1;
   
-  
     std::cout << "Enter the amount of numbers to sort: "; 
     std::cin >> vector_size; 
-      
+    
+    int low = 0;
+    int high = vector_size - 1;
+
     // generate random numbers 
     std::vector<int> unsorted_vector = genRndVector(vector_size); 
     std::vector<int> sorted_vector = unsorted_vector;
     
     // cocktail shaker sort
     while(!sorted) {
+        
         sorted = true;
+
+        // move from left to right
         for (int i = low; i < high; i++) {
             if (sorted_vector[i] > sorted_vector[i + 1]) {
                 std::swap(sorted_vector[i], sorted_vector[i + 1]);
@@ -74,6 +76,7 @@ int main() {
             }
         }
         
+        // if no swap was made, then it is sorted
         if (sorted) {
             break;
         }
@@ -81,9 +84,10 @@ int main() {
         sorted = true;
         high--;
         
-        for (int i = high; i > low + 1; i--) {
-            if (sorted_vector[i] < sorted_vector[i - 1]) {
-                std::swap(sorted_vector[i] < sorted_vector[i - 1]);
+        // move from right to left
+        for (int i = high - 1; i >= low; i--) {
+            if (sorted_vector[i] > sorted_vector[i + 1]) {
+                std::swap(sorted_vector[i], sorted_vector[i + 1]);
                 sorted = false;
             }
         }
@@ -91,6 +95,7 @@ int main() {
         low++;
     }
     
+    // output
     printComparison(unsorted_vector, sorted_vector);
     
     return 0;
