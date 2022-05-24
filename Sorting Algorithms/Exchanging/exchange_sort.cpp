@@ -13,7 +13,6 @@ void exchangeSort(std::vector<int> *vec) {
             }
         }
     }
-
 }
 
 int main() { 
