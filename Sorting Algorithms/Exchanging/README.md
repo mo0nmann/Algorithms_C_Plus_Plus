@@ -67,6 +67,7 @@ The algorithm works by picking a 'pivot' element from the array, and partitionin
 These sub-arrays are then sorted recursively until the array is sorted.
 
 ![Quicksort](https://upload.wikimedia.org/wikipedia/commons/6/6a/Sorting_quicksort_anim.gif)
+> **Note:** The horizontal lines are pivot values
 
 There are a few ways of choosing the pivot element for partitioning.
 
