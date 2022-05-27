@@ -1,6 +1,9 @@
 #include <vector>
+
 #include <random>
+
 #include <iostream>
+
 #include <algorithm>
 
 /* returns a vector of given size with random
@@ -8,10 +11,14 @@
 std::vector<int> genRndVector(int vector_size) {
 
     std::random_device rnd_device;
-    std::mt19937 mersenne_engine {rnd_device()};
-    std::uniform_int_distribution<int> dist {-100, 100};
+    std::mt19937 mersenne_engine {
+        rnd_device()
+    };
+    std::uniform_int_distribution<int> dist {
+        -100, 100
+    };
 
-    auto gen = [&dist, &mersenne_engine](){
+    auto gen = [ & dist, & mersenne_engine]() {
         return dist(mersenne_engine);
     };
 
@@ -34,7 +41,6 @@ void printComparison(std::vector<int> unsorted_vector, std::vector<int> sorted_v
     }
     std::cout << "]" << std::endl;
 
-    
     std::cout << "After: [";
     for (int i = 0; i < sorted_vector.size(); i++) {
         if (i != 0) {

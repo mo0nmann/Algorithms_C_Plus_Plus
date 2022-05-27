@@ -48,7 +48,6 @@ int findFreeSpot(std::vector<int> *S, int element, int last) {
                 next_space++;
             }
 
-
             if (S->at(next_space) > element) {
                 
                 next_space = middle - 1;
@@ -79,8 +78,6 @@ int findFreeSpot(std::vector<int> *S, int element, int last) {
         last --;
     }
     return last;
-
-
 }
 
 void handleOccupiedPos(std::vector<int> *S, int *insert_pos, int S_size) {
@@ -151,7 +148,6 @@ void rebalance(std::vector<int> *S, int initial_len, int final_len) {
         S->at(i) = EMPTY;
         k -= step;
     } 
- 
 }
 
 // copy all the elements in the gapped vector to the initial vector
@@ -182,7 +178,6 @@ void librarySort(std::vector<int> *vec, int epsilon) {
 
     // loop through unsorted vector
     while (pos < n) {
-
         for (int i = 0; i < goal; i++) {
             
             // find insert position for vec[j] into S (search for an empty spot)      
@@ -197,11 +192,9 @@ void librarySort(std::vector<int> *vec, int epsilon) {
 
             // if we have inserted all elements, return
             if (pos >= n) {
-
                 replaceInitialVector(vec, &S, S_size);
                 return;
             }
-
         }
         
         int previous_size = S_size;
@@ -210,11 +203,7 @@ void librarySort(std::vector<int> *vec, int epsilon) {
         rebalance(&S, previous_size, S_size);
         
         goal *= 2;
-
     }
-    
-    
-    
 }
 
 int main() {
