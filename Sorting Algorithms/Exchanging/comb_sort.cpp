@@ -23,6 +23,7 @@ void combSort(std::vector<int> *vec) {
 
         ordered = true;
 
+        // complete bubbling pass
         for (int i = 0; i < vec->size() - gap; i++) {
             if (vec->at(i) > vec->at(i + gap)) {
                 std::swap(vec->at(i), vec->at(i + gap));

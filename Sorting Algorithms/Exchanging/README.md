@@ -33,6 +33,8 @@ This is performed by changing the inner loop of bubble sort, such that the gap b
 
 The gap starts out as the list length dividied by *k* = 1.3, which has been suggested as the ideal shrink factor.
 
+**Note:** Comb sort differs to shellsort as it performs a 'bubbling pass' over each set for each gap, rather than completely sorting the set like shellsort does.
+
 ![Comb Sort](https://upload.wikimedia.org/wikipedia/commons/4/46/Comb_sort_demo.gif)
 
 ## Exchange Sort
