@@ -18,7 +18,6 @@ std::vector<int> createGappedVector(int n, int epsilon) {
     std::fill(S.begin(), S.end(), EMPTY);
 
     return S;
-
 }
 
 // binary search method to find a free spot for the element
