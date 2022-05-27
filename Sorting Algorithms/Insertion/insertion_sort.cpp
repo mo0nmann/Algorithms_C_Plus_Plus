@@ -3,8 +3,6 @@
 
 #include "../helpers.hpp"
 
-#include <chrono>
-
 // insertion sort algorithm
 void insertionSort(std::vector<int> *vec) {
 
