@@ -12,7 +12,7 @@ std::vector<int> createGappedVector(int n, int epsilon) {
     // with gaps of size ε
     int S_size = (1 + epsilon) * n;
 
-    // create the gapped vector and fill it with -1
+    // create the gapped vector and fill it with -2,147,483,648
     std::vector<int> S(S_size);
     std::fill(S.begin(), S.end(), EMPTY);
 
