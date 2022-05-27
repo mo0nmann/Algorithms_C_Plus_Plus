@@ -9,7 +9,7 @@
 
 std::vector<int> createGappedVector(int n, int epsilon) {
 
-     // calculate size of gapped vector
+    // calculate size of gapped vector
     // with gaps of size ε
     int S_size = (1 + epsilon) * n;
 
