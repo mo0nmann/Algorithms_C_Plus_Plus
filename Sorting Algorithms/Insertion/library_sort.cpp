@@ -54,7 +54,7 @@ int findFreeSpot(std::vector<int> *S, int element, int last) {
 
                 // move to the left
                 while (middle > first && S->at(middle) == EMPTY) {
-                    middle --;
+                    middle--;
                 }
 
                 if (S->at(middle) < element) {
