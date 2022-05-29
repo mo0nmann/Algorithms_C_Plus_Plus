@@ -7,7 +7,7 @@
    be stored at vec[high], and also sorts the three points */
 void medianThree(std::vector<int> *vec, int low, int high) {
 
-    int mid = low + (high - high) / 2;
+    int mid = low + (high - low) / 2;
 
     // sort mid and low
     if (vec->at(mid) < vec->at(low)) {
