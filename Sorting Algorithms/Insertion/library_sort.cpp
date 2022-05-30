@@ -140,7 +140,6 @@ void librarySort(std::vector<int> *vec, int epsilon) {
         int next_index, element_to_sort = 0;
        
         for (int j = a; j < std::min(b, n + 1); j++) {
-            //printVector(&S);
 
             // get next element to sort in S
             next_index = ((1 + epsilon) * j) - 1;
