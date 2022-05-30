@@ -186,7 +186,7 @@ int main() {
     std::vector<int> unsorted_vector = genRndVector(vector_size);
     std::vector<int> sorted_vector = unsorted_vector;
 
-    // library sort sort with user inputted ε
+    // library sort with user inputted ε
     librarySort(&sorted_vector, epsilon);
 
     printComparison(unsorted_vector, sorted_vector);
