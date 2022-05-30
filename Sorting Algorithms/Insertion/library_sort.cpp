@@ -139,7 +139,6 @@ void librarySort(std::vector<int> *vec) {
         b <<= 1;
 
         int next_index, element_to_sort = 0;
-
        
         for (int j = a; j < std::min(b, n + 1); j++) {
             //printVector(&S);
@@ -150,9 +149,7 @@ void librarySort(std::vector<int> *vec) {
             
             // find position for insertion
             int insert_pos = binarySearch(element_to_sort, &S, next_index);
-
-            
-            
+        
             // insert
             if (insert_pos >= 0) {
                 S[insert_pos] = element_to_sort;
@@ -160,7 +157,6 @@ void librarySort(std::vector<int> *vec) {
 
             // set old position to empty
             S[next_index] = EMPTY;
-
             
         }
         
