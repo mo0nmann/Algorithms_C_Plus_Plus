@@ -6,7 +6,7 @@
 
 /* the minimum value of int32. This
    algorithm will not work if this 
-   valueis in the vector to be sorted */
+   value is in the vector to be sorted */
 #define EMPTY -2147483648
 
 // function to create the gapped vector with gaps of size ε
