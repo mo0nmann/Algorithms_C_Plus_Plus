@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <cmath>
 
 #include "../helpers.hpp"
 
@@ -10,14 +9,14 @@
    valueis in the vector to be sorted */
 #define EMPTY -2147483648
 
-// function to create the gapped vector with ε = 1
-std::vector<int> createGappedVector(std::vector<int> *vec) {
+// function to create the gapped vector with gaps of size ε
+std::vector<int> createGappedVector(std::vector<int> *vec, int epsilon) {
 
     int n = vec->size();
 
     // calculate size of gapped vector
-    // with gaps of size ε = 1
-    int S_size = 2 * n;
+    // with gaps of size ε
+    int S_size = (1 + epsilon) * n;
 
     // create the gapped vector and fill it with -2,147,483,648
     std::vector<int> S(S_size);
@@ -25,7 +24,7 @@ std::vector<int> createGappedVector(std::vector<int> *vec) {
 
     // place elements of unsorted vector in gapped positions
     for (int i = 0; i < n; i++) {
-        S[(2 * i) + 1] = vec->at(i);
+        S[((1 + epsilon) * i) + epsilon] = vec->at(i);
     }
 
     return S;
@@ -44,7 +43,6 @@ int binarySearch(int element, std::vector<int> *S, int k) {
         // mid = (low + high) / 2
         int mid = (low + high) >> 1;
 
-        
         if (S->at(mid) != EMPTY) {
             if (S->at(mid) < element) {
                 low = mid;
@@ -56,7 +54,7 @@ int binarySearch(int element, std::vector<int> *S, int k) {
             int left = mid - 1;
             int right = mid + 1;
             
-            // ook for non-empty element to the left
+            // look for non-empty element to the left
             while (S->at(left) == EMPTY && left > 0) {
                 left--;
             }
@@ -91,13 +89,14 @@ int binarySearch(int element, std::vector<int> *S, int k) {
                 high = low;
             }
 
-            // place the element and move everything to the right
+            // insert the element and move everything to the right
             while (element != EMPTY) {
                 std::swap(S->at(high), element);
                 high++;
             }
             
             return -1;
+
         } else {
             return low;
         }
@@ -107,30 +106,30 @@ int binarySearch(int element, std::vector<int> *S, int k) {
 
 /* function to rebalance the gapped array and place ε gaps
    inbetween each element */
-void rebalance(std::vector<int> *S, int begin, int end) {
+void rebalance(std::vector<int> *S, int begin, int end, int epsilon) {
 
     int r = end;
     
     while (r >= begin) {
         if (S->at(r) != EMPTY) {
             std::swap(S->at(r), S->at(end));
-            end -= 2;
+            end -= (epsilon + 1);
         }
         r -= 1;
     }
 }
 
 // library sort sort algorithm
-void librarySort(std::vector<int> *vec) {
+void librarySort(std::vector<int> *vec, int epsilon) {
 
     // create gapped vector
-    std::vector<int> S = createGappedVector(vec);
+    std::vector<int> S = createGappedVector(vec, epsilon);
 
     int n = vec->size();
 
     int a = 1;
     int b = 2;
-    
+
     // for i to floor(log2(n) + 1)
     for (int i = 0; i < floor(log2(n) + 1); i++) {
         
@@ -144,7 +143,7 @@ void librarySort(std::vector<int> *vec) {
             //printVector(&S);
 
             // get next element to sort in S
-            next_index = (2 * j) - 1;
+            next_index = ((1 + epsilon) * j) - 1;
             element_to_sort = S[next_index];
             
             // find position for insertion
@@ -160,14 +159,8 @@ void librarySort(std::vector<int> *vec) {
             
         }
         
-        if (b > n) {
-            break;
-        }
-
-        if (i < log(n)) {
-            // rebalance
-            rebalance(&S, 0, next_index);  
-        }
+        // rebalance
+        rebalance(&S, 0, next_index, epsilon);  
 
     }
 
@@ -182,16 +175,20 @@ void librarySort(std::vector<int> *vec) {
 int main() {
     
     int vector_size;
+    int epsilon;
 
     std::cout << "Enter the amount of numbers to sort: ";
     std::cin >> vector_size;
+
+    std::cout << "Enter the desired gap size, ε, (must be greater or equal to 1): ";
+    std::cin >> epsilon;
     
     // generate random numbers
     std::vector<int> unsorted_vector = genRndVector(vector_size);
     std::vector<int> sorted_vector = unsorted_vector;
 
-    // library sort sort with ε = 1
-    librarySort(&sorted_vector);
+    // library sort sort with user inputted ε
+    librarySort(&sorted_vector, epsilon);
 
     printComparison(unsorted_vector, sorted_vector);
 
