@@ -1,207 +1,186 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 #include "../helpers.hpp"
 
-#define EMPTY INT32_MIN
+/* the minimum value of int32. This
+   algorithm will not work if this 
+   valueis in the vector to be sorted */
+#define EMPTY -2147483648
 
-std::vector<int> createGappedVector(int n, int epsilon) {
+// function to create the gapped vector with ε = 1
+std::vector<int> createGappedVector(std::vector<int> *vec) {
+
+    int n = vec->size();
 
     // calculate size of gapped vector
-    // with gaps of size ε
-    int S_size = (1 + epsilon) * n;
+    // with gaps of size ε = 1
+    int S_size = 2 * n;
 
     // create the gapped vector and fill it with -2,147,483,648
     std::vector<int> S(S_size);
     std::fill(S.begin(), S.end(), EMPTY);
 
+    // place elements of unsorted vector in gapped positions
+    for (int i = 0; i < n; i++) {
+        S[(2 * i) + 1] = vec->at(i);
+    }
+
     return S;
 }
 
-// binary search method to find a free spot for the element
-int findFreeSpot(std::vector<int> *S, int element, int last) {
-    
-    int first = 0;
-    int middle;
+/* performs binary search on the first k elements of S,
+   skipping over gaps, to find a place for the element.
+   Insertion should favor gaps over filled-in elements */   
+int binarySearch(int element, std::vector<int> *S, int k) {
+
+    // binary search
+    int low = 0;
+    int high = k;
+    while (high > low + 1) {
+
+        // mid = (low + high) / 2
+        int mid = (low + high) >> 1;
+
         
-    while (last >= 0 && S->at(last) == EMPTY) {
-        last--;
-    }
-
-    while (first <= last && S->at(first) == EMPTY) {
-        first++;
-    }
-    
-    // modified binary sort
-    while (first <= last) {
-        middle = (first + last) / 2;
-
-        if (S->at(middle) == EMPTY) {
-
-            int next_space = middle + 1;
-
-            // move to the right
-            while (next_space < last && S->at(next_space) == EMPTY) {
-                next_space++;
-            }
-
-            if (S->at(next_space) > element) {
-                
-                next_space = middle - 1;
-
-                // move to the left
-                while (middle > first && S->at(middle) == EMPTY) {
-                    middle--;
-                }
-
-                if (S->at(middle) < element) {
-                    return middle;
-                }
-
-                last = middle - 1;
-
+        if (S->at(mid) != EMPTY) {
+            if (S->at(mid) < element) {
+                low = mid;
             } else {
-                first = next_space + 1;
+                high = mid;
             }
-
-        } else if (S->at(middle) < element) {
-            first = middle + 1;
         } else {
-            last = middle - 1;
-        }
-    }
-
-    if (last >= 0 && S->at(last) == EMPTY) {
-        last --;
-    }
-    return last;
-}
-
-void handleOccupiedPos(std::vector<int> *S, int *insert_pos, int S_size) {
-    
-    int ins_pos;
-    ins_pos = *insert_pos;
-    
-    // if position is not empty
-    if (S->at(ins_pos) != EMPTY) {
-        
-        // search for a free space to the right
-        int next_free_space = ins_pos + 1;
-        while (S->at(next_free_space) != EMPTY) {
-            next_free_space++;
-        }
-        
-        /* if no free spaces to the right
-            (we hit the upper boundry)  */
-        if (next_free_space >= S_size) {
-
-            // search for a free space to the left
-            next_free_space = ins_pos - 1;
-            while (S->at(next_free_space) != EMPTY) {
-                next_free_space--;
+            
+            int left = mid - 1;
+            int right = mid + 1;
+            
+            // ook for non-empty element to the left
+            while (S->at(left) == EMPTY && left > 0) {
+                left--;
+            }
+            
+            // look for non-empty element to the right
+            while (S->at(right) == EMPTY && right < S->size()) {
+                right++;
             }
 
-            // shift all elements to the left
-            while (next_free_space < ins_pos) {
-                S->at(next_free_space) = S->at(next_free_space + 1);
-                next_free_space++;
+            if (S->at(left) > element) {
+                high = left;
+            } else if (S->at(right) < element) {
+                low = right;
+            } else {
+                low = left;
+                high = right;
+                break;
+            }
+        }   
+    }
+
+    if (high > low + 1) {
+        return (low + high) >> 1;
+    } else {
+
+        /* if the found element is not a gap
+           we will handle the sorting /  placement
+           in here and return -1            */
+        if (S->at(low) != EMPTY) {
+
+            if (S->at(low) > element) {
+                high = low;
             }
 
+            // place the element and move everything to the right
+            while (element != EMPTY) {
+                std::swap(S->at(high), element);
+                high++;
+            }
+            
+            return -1;
         } else {
-            // shift all elements to the right
-            while (next_free_space > ins_pos) {
-                S->at(next_free_space) = S->at(next_free_space - 1);
-                next_free_space--;
-            }
-        }
-
-    // if insert position is out of bounds
-    } else if (ins_pos >= S_size) {
-        
-        insert_pos--;
-        
-        // search for a free space to the left
-        int next_free_space = ins_pos - 1;
-        while (S->at(next_free_space) != EMPTY) {
-            next_free_space--;
-        }
-
-        // shift all elements to the left
-        while (next_free_space < ins_pos) {
-            S->at(next_free_space) = S->at(next_free_space + 1);
-            next_free_space++;
+            return low;
         }
     }
+
 }
 
-// inserts spaces between each pair of elements in the vector
-void rebalance(std::vector<int> *S, int initial_len, int final_len) {
+/* function to rebalance the gapped array and place ε gaps
+   inbetween each element */
+void rebalance(std::vector<int> *S, int begin, int end) {
 
-    int k = final_len - 1;
-    int step = final_len / initial_len;
-
-    for (int i = initial_len - 1; i >= 0; i--) {        
-        S->at(k) = S->at(i);
-        S->at(i) = EMPTY;
-        k -= step;
-    } 
-}
-
-// copy all the elements in the gapped vector to the initial vector
-void replaceInitialVector(std::vector<int> *vec, std::vector<int> *S, int S_size) {
-
-    for (int i = 0, j = 0; i < S_size && j < vec->size(); i++) {
-        if (S->at(i) != EMPTY) {
-            vec->at(j) = S->at(i);
-            j++;
+    int r = end;
+    
+    while (r >= begin) {
+        if (S->at(r) != EMPTY) {
+            std::swap(S->at(r), S->at(end));
+            end -= 2;
         }
+        r -= 1;
     }
 }
 
 // library sort sort algorithm
-void librarySort(std::vector<int> *vec, int epsilon) {
-    
-    int n = vec->size();
-    
+void librarySort(std::vector<int> *vec) {
+
     // create gapped vector
-    std::vector<int> S = createGappedVector(n, epsilon);
+    std::vector<int> S = createGappedVector(vec);
 
-    int goal = 1;    
-    int pos = 1;
+    int n = vec->size();
 
-    S[0] = vec->at(0);
+    int a = 1;
+    int b = 2;
+    
+    // for i to floor(log2(n) + 1)
+    for (int i = 0; i < floor(log2(n) + 1); i++) {
+        
+        // multiply a and b by 2
+        a <<= 1;
+        b <<= 1;
 
-    int S_size = std::max(1 + epsilon, goal + 1);
+        int next_index, element_to_sort = 0;
 
-    // loop through unsorted vector
-    while (pos < n) {
-        for (int i = 0; i < goal; i++) {
+       
+        for (int j = a; j < std::min(b, n + 1); j++) {
+            //printVector(&S);
+
+            // get next element to sort in S
+            next_index = (2 * j) - 1;
+            element_to_sort = S[next_index];
             
-            // find insert position for vec[j] into S (search for an empty spot)      
-            int insert_pos = findFreeSpot(&S, vec->at(pos), S_size - 1);
+            // find position for insertion
+            int insert_pos = binarySearch(element_to_sort, &S, next_index);
+
             
-            insert_pos++;
-            handleOccupiedPos(&S, &insert_pos, S_size);          
-
-            // Insert the element and increment the position
-            S[insert_pos] = vec->at(pos);
-            pos++;
-
-            // if we have inserted all elements, return
-            if (pos >= n) {
-                replaceInitialVector(vec, &S, S_size);
-                return;
+            
+            // insert
+            if (insert_pos >= 0) {
+                S[insert_pos] = element_to_sort;
             }
+
+            // set old position to empty
+            S[next_index] = EMPTY;
+
+            
         }
         
-        int previous_size = S_size;
-        S_size = std::min((2 + 2 * epsilon) * goal, (1 + epsilon) * n);
-        
-        rebalance(&S, previous_size, S_size);
-        
-        goal *= 2;
+        if (b > n) {
+            break;
+        }
+
+        if (i < log(n)) {
+            // rebalance
+            rebalance(&S, 0, next_index);  
+        }
+
     }
+
+    // clear the original array and place all non gap elements in it
+    vec->clear();
+    std::copy_if(S.begin(), S.end(), std::back_inserter(*vec), [](int x) {
+        return x != EMPTY;
+    });
+
 }
 
 int main() {
@@ -215,12 +194,10 @@ int main() {
     std::vector<int> unsorted_vector = genRndVector(vector_size);
     std::vector<int> sorted_vector = unsorted_vector;
 
-    // library sort sort with ε = 4
-    librarySort(&sorted_vector, 4);
-    
-    // output
+    // library sort sort with ε = 1
+    librarySort(&sorted_vector);
+
     printComparison(unsorted_vector, sorted_vector);
-    
 
     return 0;
 }
