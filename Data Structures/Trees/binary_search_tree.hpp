@@ -1,5 +1,4 @@
 #include <iostream>
-#include <memory>
 #include <vector>
 #include <iterator>
 #include <functional>
@@ -19,7 +18,7 @@ class binary_search_tree {
                we can have duplicates values in the tree */
             int value_count;
 
-            // pointers to children and parents
+            // pointers to children and parent
             bst_node *left;
             bst_node *right;
             bst_node *parent;
