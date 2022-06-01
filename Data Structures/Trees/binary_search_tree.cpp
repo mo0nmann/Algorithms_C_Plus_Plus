@@ -66,6 +66,9 @@ class binary_search_tree {
 
         void postorder_traversal(bst_node *node, std::function<void(T)> callback);
 
+        // function to recursively clear nodes from memory
+        void delete_recursive(bst_node *node);
+
     public:
         binary_search_tree();
         binary_search_tree(T value);
@@ -87,6 +90,8 @@ class binary_search_tree {
         std::vector<T> get_elements_preorder();
         std::vector<T> get_elements_inorder();
         std::vector<T> get_elements_postorder();
+
+        
 };
 
 // create empty BST
@@ -122,8 +127,20 @@ binary_search_tree<T>::binary_search_tree(std::vector<T> &values) {
 template<class T>
 binary_search_tree<T>::~binary_search_tree()
 {
-    delete root;
-    root = NULL;
+    delete_recursive(root);
+}
+
+
+template<class T>
+void binary_search_tree<T>::delete_recursive(bst_node *node) {
+
+    if (node) {
+        delete_recursive(node->left);
+        delete_recursive(node->right);
+        delete node;
+        node = NULL;
+    }
+
 }
 
 // iterative search find element in BST. Returns nullptr if not found
@@ -212,7 +229,7 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::successor(bst_
     bst_node *parent_node = node->parent;
 
     // navigate up the parent ancestor nodes
-    while(parent_node != nullptr && node == parent_node->right) {
+    while(parent_node != nullptr && temp == parent_node->right) {
         temp = parent_node;
         parent_node = parent_node->parent;
     }
@@ -264,7 +281,7 @@ bool binary_search_tree<T>::insert(T value) {
     // if the tree is empty just create the node
     if (root == nullptr) {
         root = new bst_node(value);
-
+        
     // if a root already exists
     } else {
 
@@ -281,7 +298,7 @@ bool binary_search_tree<T>::insert(T value) {
 
         // create the new node
         bst_node* new_node = new bst_node(value);
-
+        
         // set current node to root
         bst_node* current_node = root;
 
@@ -357,6 +374,10 @@ bool binary_search_tree<T>::remove(T value) {
 
     int node_occurrences = current_node->value_count;
 
+    /* make a copy of the node to be removed so we can
+       delete it from memory afterwards */
+    bst_node *copy = current_node;
+
     /* if the current node doesn't have a left child
        then we can replace it with it's right child.
        If it doesn't have a right child it gets set 
@@ -393,6 +414,10 @@ bool binary_search_tree<T>::remove(T value) {
         succ->left = current_node->left;
         succ->left->parent = succ;
     }
+
+    // delete the node from memory
+    delete copy;
+    copy = NULL;
 
     amount_of_nodes -= node_occurrences;
     return true;
