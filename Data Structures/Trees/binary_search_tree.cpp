@@ -10,7 +10,13 @@ class binary_search_tree {
         // tree node
         struct bst_node {
 
+            // value stored at node
             int value;
+
+            /* include a variable to keep count of
+               how many of this value there are. That way
+               we can have duplicates values in the tree */
+            int value_count;
 
             // pointers to children and parents
             bst_node *left;
@@ -20,6 +26,7 @@ class binary_search_tree {
             // node constructor
             explicit bst_node(int value) {
                 this->value = value;
+                value_count = 1;
                 left = nullptr;
                 right = nullptr;
                 parent = nullptr;
@@ -248,6 +255,17 @@ bool binary_search_tree::insert(int value) {
     // if a root already exists
     } else {
 
+        bst_node *existing_node = search(value);
+
+        // if the value already exists in the tree, just increment the count
+        if (existing_node != nullptr) {
+
+            amount_of_nodes++;
+            existing_node->value_count++;
+
+            return true;
+        }
+
         // create the new node
         bst_node* new_node = new bst_node(value);
 
@@ -288,23 +306,27 @@ bool binary_search_tree::insert(int value) {
 // helper function to replace node u with v in the bst
 void binary_search_tree::shift_nodes(bst_node *u, bst_node *v) {
 
+    if (u == nullptr) {
+        return;
+    }
+
     // if u is the root node, set v as the root node
     if (u->parent == nullptr) {
         root = v;
 
     // if u is to the left of it's parent
-    } else if (u = u->parent->left) {
+    } else if (u == u->parent->left) {
         u->parent->left = v;
-
     // if u is to the right of it's parent
     } else {
         u->parent->right = v;
     }
-
+    
     // make u's parent v's parent
     if (v != nullptr) {
         v->parent = u->parent;
     }
+    
 }
 
 // removes node with matching value
@@ -317,6 +339,8 @@ bool binary_search_tree::remove(int value) {
     if (current_node == nullptr) {
         return false;
     }
+
+    int node_occurrences = current_node->value_count;
 
     /* if the current node doesn't have a left child
        then we can replace it with it's right child.
@@ -335,7 +359,7 @@ bool binary_search_tree::remove(int value) {
     /* if the current node has two children, then it's
        successor takes it's position                */
     } else {
-
+        
         // find successor
         bst_node *succ = successor(current_node);
 
@@ -355,7 +379,7 @@ bool binary_search_tree::remove(int value) {
         succ->left->parent = succ;
     }
 
-    amount_of_nodes--;
+    amount_of_nodes -= node_occurrences;
     return true;
     
 }
@@ -372,8 +396,11 @@ void binary_search_tree::preorder_traversal(bst_node *node, std::function<void(i
         return;
     }
 
-    // invokes elements.push_back(node->value)
-    callback(node->value);
+    // take into account each occurance of the element
+    for (int i = 0; i < node->value_count; i++) {
+        // invokes elements.push_back(node->value)
+        callback(node->value);
+    }    
     preorder_traversal(node->left, callback);
     preorder_traversal(node->right, callback);
 }
@@ -386,7 +413,9 @@ void binary_search_tree::inorder_traversal(bst_node *node, std::function<void(in
     }
 
     inorder_traversal(node->left, callback);
-    callback(node->value);
+    for (int i = 0; i < node->value_count; i++) {
+        callback(node->value);
+    }    
     inorder_traversal(node->right, callback);
 }
 
@@ -399,7 +428,9 @@ void binary_search_tree::postorder_traversal(bst_node *node, std::function<void(
 
     postorder_traversal(node->left, callback);
     postorder_traversal(node->right, callback);
-    callback(node->value);
+    for (int i = 0; i < node->value_count; i++) {
+        callback(node->value);
+    }    
 }
 
 // store elements of bst into a vector in preorder order
@@ -440,13 +471,14 @@ std::vector<int> binary_search_tree::get_elements_postorder() {
 
 int main() {
 
-    std::vector<int> values = {1, 8, 5, 7, 11, 3, 21, 11};
+    std::vector<int> values = {1, 8, 5, 11, 3, -66, 7, 11, 3, 21};
 
     binary_search_tree tree = binary_search_tree(values);
 
     
     std::vector<int>::iterator it;
 
+    
     std::vector<int> preordered = tree.get_elements_preorder();
     std::cout << "Pre Order: ";
     for (it = preordered.begin(); it != preordered.end(); it++) {
@@ -491,16 +523,25 @@ int main() {
         std::cout << "18 NOT found in BST" << std::endl;
     }
 
-    tree.insert(11);
+    tree.insert(15);
     tree.insert(-55);
     tree.insert(23);
     tree.insert(45);
     tree.insert(-66);
+    
+    inordered = tree.get_elements_inorder();
+    std::cout << "Before: ";
+
+    for (it = inordered.begin(); it != inordered.end(); it++) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
 
     tree.remove(11);
+    //std::cout << "status " << tree.remove(11) << std::endl;
 
     inordered = tree.get_elements_inorder();
-    std::cout << "In Order: ";
+    std::cout << "After: ";
 
     for (it = inordered.begin(); it != inordered.end(); it++) {
         std::cout << *it << " ";
