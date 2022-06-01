@@ -4,6 +4,7 @@
 #include <iterator>
 #include <functional>
 
+template <class T>
 class binary_search_tree {
     private:
         
@@ -11,7 +12,7 @@ class binary_search_tree {
         struct bst_node {
 
             // value stored at node
-            int value;
+            T value;
 
             /* include a variable to keep count of
                how many of this value there are. That way
@@ -24,7 +25,7 @@ class binary_search_tree {
             bst_node *parent;
 
             // node constructor
-            explicit bst_node(int value) {
+            explicit bst_node(T value) {
                 this->value = value;
                 value_count = 1;
                 left = nullptr;
@@ -40,7 +41,7 @@ class binary_search_tree {
         int amount_of_nodes;
 
         // searches for given balue in bst
-        bst_node * search(int value);
+        bst_node * search(T value);
 
         // calculate max value from given node
         bst_node * maximum(bst_node *node);
@@ -59,71 +60,75 @@ class binary_search_tree {
 
         /* traverses the bst in pre-order order, visiting node, left, then right. 
            The */
-        void preorder_traversal(bst_node *node, std::function<void(int)> callback);
+        void preorder_traversal(bst_node *node, std::function<void(T)> callback);
         
-        void inorder_traversal(bst_node *node, std::function<void(int)> callback);
+        void inorder_traversal(bst_node *node, std::function<void(T)> callback);
 
-        void postorder_traversal(bst_node *node, std::function<void(int)> callback);
+        void postorder_traversal(bst_node *node, std::function<void(T)> callback);
 
     public:
         binary_search_tree();
-        binary_search_tree(int value);
-        binary_search_tree(std::vector<int> &values);
+        binary_search_tree(T value);
+        binary_search_tree(std::vector<T> &values);
 
         ~binary_search_tree();
 
         // indicates whether given value is within bst
-        bool contains_value(int value);
+        bool contains_value(T value);
 
-        int bst_max();
-        int bst_min();
+        T bst_max();
+        T bst_min();
 
-        bool insert(int value);
-        bool remove(int value);
+        bool insert(T value);
+        bool remove(T value);
 
         int node_count();
         
-        std::vector<int> get_elements_preorder();
-        std::vector<int> get_elements_inorder();
-        std::vector<int> get_elements_postorder();
+        std::vector<T> get_elements_preorder();
+        std::vector<T> get_elements_inorder();
+        std::vector<T> get_elements_postorder();
 };
 
 // create empty BST
-binary_search_tree::binary_search_tree()
-{
+template<class T>
+binary_search_tree<T>::binary_search_tree() {
     root = nullptr;
     amount_of_nodes = 0;
 }
 
 // create single node BST
-binary_search_tree::binary_search_tree(int value) {
+template<class T>
+binary_search_tree<T>::binary_search_tree(T value) {
     root = new bst_node(value);
     amount_of_nodes = 1;
 }
 
 // create BST from a vector of values
-binary_search_tree::binary_search_tree(std::vector<int> &values) {
+template<class T>
+binary_search_tree<T>::binary_search_tree(std::vector<T> &values) {
     
     // set the node first
     root = new bst_node(values[0]);
     amount_of_nodes = 1;
 
     // iterate over all but first value and insert them
-    std::vector<int>::iterator it;
+    typename std::vector<T>::iterator it;
     for (it = values.begin() + 1; it != values.end(); it++) {
         insert(*it);
     }
 
 }
 
-binary_search_tree::~binary_search_tree()
+template<class T>
+binary_search_tree<T>::~binary_search_tree()
 {
     delete root;
     root = NULL;
 }
 
 // iterative search find element in BST. Returns nullptr if not found
-binary_search_tree::bst_node * binary_search_tree::search(int value) {
+template<class T>
+typename binary_search_tree<T>::bst_node * binary_search_tree<T>::search(T value) {
 
     // return nullptr if empty bst
     if (root == nullptr) {
@@ -154,7 +159,8 @@ binary_search_tree::bst_node * binary_search_tree::search(int value) {
 }
 
 // returns whether the value is in the bst or not
-bool binary_search_tree::contains_value(int value) {
+template<class T>
+bool binary_search_tree<T>::contains_value(T value) {
 
     if (search(value) == nullptr) {
         return false;
@@ -164,7 +170,8 @@ bool binary_search_tree::contains_value(int value) {
 }
 
 // find node with the maximum value from the given node
-binary_search_tree::bst_node * binary_search_tree::maximum(bst_node *node) {
+template<class T>
+typename binary_search_tree<T>::bst_node * binary_search_tree<T>::maximum(bst_node *node) {
 
     bst_node *temp = node;
 
@@ -176,7 +183,8 @@ binary_search_tree::bst_node * binary_search_tree::maximum(bst_node *node) {
 }
 
 // find node with the minimum value from the given root
-binary_search_tree::bst_node * binary_search_tree::minimum(bst_node *node) {
+template<class T>
+typename binary_search_tree<T>::bst_node * binary_search_tree<T>::minimum(bst_node *node) {
     
     bst_node *temp = node;
 
@@ -192,7 +200,8 @@ binary_search_tree::bst_node * binary_search_tree::minimum(bst_node *node) {
    value greater than the given node.
    (If all values are placed in order, 
    it will be the value directly after it)   */
-binary_search_tree::bst_node * binary_search_tree::successor(bst_node *node) {
+template<class T>
+typename binary_search_tree<T>::bst_node * binary_search_tree<T>::successor(bst_node *node) {
 
     // return the leftmost child of the right child
     if (node->right != nullptr) {
@@ -216,7 +225,8 @@ binary_search_tree::bst_node * binary_search_tree::successor(bst_node *node) {
    value smaller than the given node
    (If all values are placed in order, 
    it will be the value directly before it)   */
-binary_search_tree::bst_node * binary_search_tree::predecessor(bst_node *node) {
+template<class T>
+typename binary_search_tree<T>::bst_node * binary_search_tree<T>::predecessor(bst_node *node) {
 
     // return the rightmost child of the left child
     if (node->left != nullptr) {
@@ -236,17 +246,20 @@ binary_search_tree::bst_node * binary_search_tree::predecessor(bst_node *node) {
 }
 
 // returns the value of the maximum value in the bst
-int binary_search_tree::bst_max() {
+template<class T>
+T binary_search_tree<T>::bst_max() {
     return maximum(root)->value;
 }
 
 // returns the value of the minimum value in the bst
-int binary_search_tree::bst_min() {
+template<class T>
+T binary_search_tree<T>::bst_min() {
     return minimum(root)->value;
 }
 
 // inserts a new node into the bst
-bool binary_search_tree::insert(int value) {
+template<class T>
+bool binary_search_tree<T>::insert(T value) {
 
     // if the tree is empty just create the node
     if (root == nullptr) {
@@ -304,7 +317,8 @@ bool binary_search_tree::insert(int value) {
 }
 
 // helper function to replace node u with v in the bst
-void binary_search_tree::shift_nodes(bst_node *u, bst_node *v) {
+template<class T>
+void binary_search_tree<T>::shift_nodes(bst_node *u, bst_node *v) {
 
     if (u == nullptr) {
         return;
@@ -330,7 +344,8 @@ void binary_search_tree::shift_nodes(bst_node *u, bst_node *v) {
 }
 
 // removes node with matching value
-bool binary_search_tree::remove(int value) {
+template<class T>
+bool binary_search_tree<T>::remove(T value) {
 
     // find the node
     bst_node *current_node = search(value);
@@ -385,12 +400,14 @@ bool binary_search_tree::remove(int value) {
 }
 
 // return how many nodes there are in the bst
-int binary_search_tree::node_count() {
+template<class T>
+int binary_search_tree<T>::node_count() {
     return amount_of_nodes;
 }
 
 // traverse the tree in preorder fashion. Visit the node, then left, then right.
-void binary_search_tree::preorder_traversal(bst_node *node, std::function<void(int)> callback) {
+template<class T>
+void binary_search_tree<T>::preorder_traversal(bst_node *node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
@@ -406,7 +423,8 @@ void binary_search_tree::preorder_traversal(bst_node *node, std::function<void(i
 }
 
 // traverse the tree in inorder fashion. Visit the left, then the node, then the right.
-void binary_search_tree::inorder_traversal(bst_node *node, std::function<void(int)> callback) {
+template<class T>
+void binary_search_tree<T>::inorder_traversal(bst_node *node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
@@ -420,7 +438,8 @@ void binary_search_tree::inorder_traversal(bst_node *node, std::function<void(in
 }
 
 // traverse the tree in postorder fashion. Visit the left, then right, then the node
-void binary_search_tree::postorder_traversal(bst_node *node, std::function<void(int)> callback) {
+template<class T>
+void binary_search_tree<T>::postorder_traversal(bst_node *node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
@@ -434,13 +453,14 @@ void binary_search_tree::postorder_traversal(bst_node *node, std::function<void(
 }
 
 // store elements of bst into a vector in preorder order
-std::vector<int> binary_search_tree::get_elements_preorder() {
-    std::vector<int> elements;
+template<class T>
+std::vector<T> binary_search_tree<T>::get_elements_preorder() {
+    std::vector<T> elements;
 
     /* call preorder_traversal and pass elements.push_back(node_value)
        as a lambda function. This way this function can be called
        in preorder_traversal via the std::function<void(int)> callback */
-    preorder_traversal(root, [&](int node_value) {
+    preorder_traversal(root, [&](T node_value) {
         elements.push_back(node_value);
     });
 
@@ -448,10 +468,11 @@ std::vector<int> binary_search_tree::get_elements_preorder() {
 }
 
 // store elements of bst into a vector in inorder order
-std::vector<int> binary_search_tree::get_elements_inorder() {
-    std::vector<int> elements;
+template<class T>
+std::vector<T> binary_search_tree<T>::get_elements_inorder() {
+    std::vector<T> elements;
 
-    inorder_traversal(root, [&](int node_value) {
+    inorder_traversal(root, [&](T node_value) {
         elements.push_back(node_value);
     });
 
@@ -459,10 +480,11 @@ std::vector<int> binary_search_tree::get_elements_inorder() {
 }
 
 // store elements of bst into a vector in postorder order
-std::vector<int> binary_search_tree::get_elements_postorder() {
-    std::vector<int> elements;
+template<class T>
+std::vector<T> binary_search_tree<T>::get_elements_postorder() {
+    std::vector<T> elements;
 
-    postorder_traversal(root, [&](int node_value) {
+    postorder_traversal(root, [&](T node_value) {
         elements.push_back(node_value);
     });
 
@@ -473,7 +495,7 @@ int main() {
 
     std::vector<int> values = {1, 8, 5, 11, 3, -66, 7, 11, 3, 21};
 
-    binary_search_tree tree = binary_search_tree(values);
+    binary_search_tree<int> tree = binary_search_tree<int>(values);
 
     
     std::vector<int>::iterator it;
