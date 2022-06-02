@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 #include <iterator>
 #include <functional>
@@ -81,14 +80,19 @@ class binary_search_tree {
         T bst_max();
         T bst_min();
 
-        bool insert(T value);
+        void insert(T value);
         bool remove(T value);
 
         int node_count();
         
-        std::vector<T> get_elements_preorder();
-        std::vector<T> get_elements_inorder();
-        std::vector<T> get_elements_postorder();
+        // traverse the tree in preorder with a user defined lamda function
+        void apply_preorder(std::function<void(T)> callback);
+
+        // traverse the tree inorder with a user defined lamda function
+        void apply_inorder(std::function<void(T)> callback);
+
+        // traverse the tree in postorder with a user defined lamda function
+        void apply_postorder(std::function<void(T)> callback);
 
         
 };
@@ -177,12 +181,7 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::search(T value
 // returns whether the value is in the bst or not
 template<class T>
 bool binary_search_tree<T>::contains_value(T value) {
-
-    if (search(value) == nullptr) {
-        return false;
-    } else {
-        return true;
-    }
+    return search(value) != nullptr;
 }
 
 // find node with the maximum value from the given node
@@ -275,7 +274,7 @@ T binary_search_tree<T>::bst_min() {
 
 // inserts a new node into the bst
 template<class T>
-bool binary_search_tree<T>::insert(T value) {
+void binary_search_tree<T>::insert(T value) {
 
     // if the tree is empty just create the node
     if (root == nullptr) {
@@ -292,7 +291,7 @@ bool binary_search_tree<T>::insert(T value) {
             amount_of_nodes++;
             existing_node->value_count++;
 
-            return true;
+            return;
         }
 
         // create the new node
@@ -329,7 +328,6 @@ bool binary_search_tree<T>::insert(T value) {
     }
 
     amount_of_nodes++;
-    return true;
 }
 
 // helper function to replace node u with v in the bst
@@ -476,41 +474,20 @@ void binary_search_tree<T>::postorder_traversal(bst_node *node, std::function<vo
     }    
 }
 
-// store elements of bst into a vector in preorder order
+// traverse the tree in preorder with a user defined lamda function
 template<class T>
-std::vector<T> binary_search_tree<T>::get_elements_preorder() {
-    std::vector<T> elements;
-
-    /* call preorder_traversal and pass elements.push_back(node_value)
-       as a lambda function. This way this function can be called
-       in preorder_traversal via the std::function<void(int)> callback */
-    preorder_traversal(root, [&](T node_value) {
-        elements.push_back(node_value);
-    });
-
-    return elements;
+void binary_search_tree<T>::apply_preorder(std::function<void(T)> callback) {
+    preorder_traversal(root, callback);
 }
 
-// store elements of bst into a vector in inorder order
+// traverse the tree inorder with a user defined lamda function
 template<class T>
-std::vector<T> binary_search_tree<T>::get_elements_inorder() {
-    std::vector<T> elements;
-
-    inorder_traversal(root, [&](T node_value) {
-        elements.push_back(node_value);
-    });
-
-    return elements;
+void binary_search_tree<T>::apply_inorder(std::function<void(T)> callback) {
+    inorder_traversal(root, callback);
 }
 
-// store elements of bst into a vector in postorder order
+// traverse the tree in postorder with a user defined lamda function
 template<class T>
-std::vector<T> binary_search_tree<T>::get_elements_postorder() {
-    std::vector<T> elements;
-
-    postorder_traversal(root, [&](T node_value) {
-        elements.push_back(node_value);
-    });
-
-    return elements;
+void binary_search_tree<T>::apply_postorder(std::function<void(T)> callback) {
+    postorder_traversal(root, callback);
 }
