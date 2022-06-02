@@ -3,8 +3,8 @@
   
 #include "../helpers.hpp"
 
-/* sets the median of the low, middle and high values to
-   be stored at vec[high], and also sorts the three points */
+// sets the median of the low, middle and high values to
+// be stored at vec[high], and also sorts the three points 
 void medianThree(std::vector<int> *vec, int low, int high) {
 
     int mid = low + (high - low) / 2;
@@ -37,17 +37,17 @@ int partition(std::vector<int> *vec, int low, int high) {
     // loop through the partition
     for (int j = low; j < high; j++) {
         
-        /* if the current element is less than or equal to the pivot
-           swap the current element with the element at the pivot 
-           index and move the pivot index forward                 */
+        // if the current element is less than or equal to the pivot
+        // swap the current element with the element at the pivot 
+        // index and move the pivot index forward                 
         if (vec->at(j) <= pivot) {
             std::swap(vec->at(i), vec->at(j));
             i++;
         }
     }
 
-    /* swap pivot with element at partition index. This element is
-       the last element to be swapped. Then return the index    */
+    // swap pivot with element at partition index. This element is
+    // the last element to be swapped. Then return the index    
     std::swap(vec->at(i), vec->at(high));
     
     return i;

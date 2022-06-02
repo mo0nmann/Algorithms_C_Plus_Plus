@@ -10,8 +10,8 @@ void gnomeSort(std::vector<int> *vec) {
     
     while (position < vec->size()) {
 
-        /* if at the beginning or the next element is correctly ordered,
-           move to the next position                                  */
+        // if at the beginning or the next element is correctly ordered,
+        // move to the next position                                  
         if (position == 0 || vec->at(position) >= vec->at(position - 1)) {
             position++;
         // otherwise swap

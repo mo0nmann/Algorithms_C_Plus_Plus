@@ -44,13 +44,13 @@ void shellSort(std::vector<int> *vec) {
         // move from the vec[gap] to the right
         for (int i = gap; i < vec->size(); i++) {
 
-            /* hold the element that we want to compare and
-            potentially insert into the correct place */
+            // hold the element that we want to compare and
+            //potentially insert into the correct place */
             key = vec->at(i);
 
-            /* check all elements to the left of the key that are a
-               N gaps away. If they are larger than the key, move
-               them N gaps to the right                          */
+            // check all elements to the left of the key that are a
+            // N gaps away. If they are larger than the key, move
+            // them N gaps to the right                          
             for (j = i; j >= gap && vec->at(j - gap) > key; j-= gap) {
                 vec->at(j) = vec->at(j - gap);
             }

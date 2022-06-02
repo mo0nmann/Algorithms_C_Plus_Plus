@@ -4,9 +4,9 @@
 
 #include "../helpers.hpp"
 
-/* the minimum value of int32. This
-   algorithm will not work if this 
-   value is in the vector to be sorted */
+// the minimum value of int32. This
+// algorithm will not work if this 
+// value is in the vector to be sorted 
 #define EMPTY -2147483648
 
 // function to create the gapped vector with gaps of size ε
@@ -30,9 +30,9 @@ std::vector<int> createGappedVector(std::vector<int> *vec, int epsilon) {
     return S;
 }
 
-/* performs binary search on the first k elements of S,
-   skipping over gaps, to find a place for the element.
-   Insertion should favor gaps over filled-in elements */   
+// performs binary search on the first k elements of S,
+// skipping over gaps, to find a place for the element.
+// Insertion should favor gaps over filled-in elements 
 int binarySearch(int element, std::vector<int> *S, int k) {
 
     // binary search
@@ -80,9 +80,9 @@ int binarySearch(int element, std::vector<int> *S, int k) {
         return (low + high) >> 1;
     } else {
 
-        /* if the found element is not a gap
-           we will handle the sorting /  placement
-           in here and return -1            */
+        // if the found element is not a gap
+        // we will handle the sorting /  placement
+        // in here and return -1            
         if (S->at(low) != EMPTY) {
 
             if (S->at(low) > element) {
@@ -104,8 +104,8 @@ int binarySearch(int element, std::vector<int> *S, int k) {
 
 }
 
-/* function to rebalance the gapped array and place ε gaps
-   inbetween each element */
+// function to rebalance the gapped array and place ε gaps
+// inbetween each element
 void rebalance(std::vector<int> *S, int begin, int end, int epsilon) {
 
     int r = end;

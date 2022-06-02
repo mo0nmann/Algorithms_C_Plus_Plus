@@ -3,27 +3,27 @@
 #include <functional>
 
 template <class T>
-class binary_search_tree {
+class BinarySearchTree {
     private:
         
         // tree node
-        struct bst_node {
+        struct BSTNode {
 
             // value stored at node
             T value;
 
-            /* include a variable to keep count of
-               how many of this value there are. That way
-               we can have duplicates values in the tree */
+            // include a variable to keep count of
+            // how many of this value there are. That way
+            // we can have duplicates values in the tree
             int value_count;
 
             // pointers to children and parent
-            bst_node *left;
-            bst_node *right;
-            bst_node *parent;
+            BSTNode *left;
+            BSTNode *right;
+            BSTNode *parent;
 
             // node constructor
-            explicit bst_node(T value) {
+            explicit BSTNode(T value) {
                 this->value = value;
                 value_count = 1;
                 left = nullptr;
@@ -33,91 +33,92 @@ class binary_search_tree {
         };
 
         // pointer to the root
-        bst_node *root;
+        BSTNode *root_;
 
         // number of nodes
-        int amount_of_nodes;
+        int amount_of_nodes_;
 
         // searches for given balue in bst
-        bst_node * search(T value);
+        BSTNode * search(T value);
 
         // calculate max value from given node
-        bst_node * maximum(bst_node *node);
+        BSTNode * maximum(BSTNode *node);
 
         // calculate min value from given node
-        bst_node * minimum(bst_node *node);
+        BSTNode * minimum(BSTNode *node);
 
         // calculate successor from given node
-        bst_node * successor(bst_node *node);
+        BSTNode * successor(BSTNode *node);
 
         // calculate predescessor from given node
-        bst_node * predecessor(bst_node *node);
+        BSTNode * predecessor(BSTNode *node);
 
         // helper function to replace node u with node v
-        void shift_nodes(bst_node *u, bst_node *v);
+        void shiftNodes(BSTNode *u, BSTNode *v);
 
-        /* traverses the bst in pre-order order, visiting node, left, then right. 
-           The */
-        void preorder_traversal(bst_node *node, std::function<void(T)> callback);
+        // traverses the bst in pre-order order, visiting node, left, then right. 
+        void preorderTraversal(BSTNode *node, std::function<void(T)> callback);
         
-        void inorder_traversal(bst_node *node, std::function<void(T)> callback);
+        // traverses the bst inorder order, visiting the left, then the node, then right. 
+        void inorderTraversal(BSTNode *node, std::function<void(T)> callback);
 
-        void postorder_traversal(bst_node *node, std::function<void(T)> callback);
+        // traverses the bst in pre-order order, visiting the left, then right, then the node
+        void postorderTraversal(BSTNode *node, std::function<void(T)> callback);
 
         // function to recursively clear nodes from memory
-        void delete_recursive(bst_node *node);
+        void deleteRecursive(BSTNode *node);
 
     public:
-        binary_search_tree();
-        binary_search_tree(T value);
-        binary_search_tree(std::vector<T> &values);
+        BinarySearchTree();
+        BinarySearchTree(T value);
+        BinarySearchTree(std::vector<T> &values);
 
-        ~binary_search_tree();
+        ~BinarySearchTree();
 
         // indicates whether given value is within bst
-        bool contains_value(T value);
+        bool containsValue(T value);
 
-        T bst_max();
-        T bst_min();
+        T bstMax();
+        T bstMin();
 
         void insert(T value);
         bool remove(T value);
 
-        int node_count();
+        int nodeCount();
         
         // traverse the tree in preorder with a user defined lamda function
-        void apply_preorder(std::function<void(T)> callback);
+        void applyPreorder(std::function<void(T)> callback);
 
         // traverse the tree inorder with a user defined lamda function
-        void apply_inorder(std::function<void(T)> callback);
+        void applyInorder(std::function<void(T)> callback);
 
         // traverse the tree in postorder with a user defined lamda function
-        void apply_postorder(std::function<void(T)> callback);
+        void applyPostorder(std::function<void(T)> callback);
 
         
 };
 
 // create empty BST
 template<class T>
-binary_search_tree<T>::binary_search_tree() {
-    root = nullptr;
-    amount_of_nodes = 0;
+BinarySearchTree<T>::BinarySearchTree() {
+    root_ = nullptr;
+    amount_of_nodes_ = 0;
 }
 
 // create single node BST
 template<class T>
-binary_search_tree<T>::binary_search_tree(T value) {
-    root = new bst_node(value);
-    amount_of_nodes = 1;
+BinarySearchTree<T>::BinarySearchTree(T value) {
+    root_ = new BSTNode(value);
+    amount_of_nodes_ = 1;
 }
 
 // create BST from a vector of values
 template<class T>
-binary_search_tree<T>::binary_search_tree(std::vector<T> &values) {
+BinarySearchTree<T>::BinarySearchTree(std::vector<T> &values) {
     
     // set the node first
-    root = new bst_node(values[0]);
-    amount_of_nodes = 1;
+    root_ = new BSTNode(values[0]);
+    amount_of_nodes_ = 1;
 
     // iterate over all but first value and insert them
     typename std::vector<T>::iterator it;
@@ -128,18 +129,18 @@ binary_search_tree<T>::binary_search_tree(std::vector<T> &values) {
 }
 
 template<class T>
-binary_search_tree<T>::~binary_search_tree()
+BinarySearchTree<T>::~BinarySearchTree()
 {
-    delete_recursive(root);
+    deleteRecursive(root_);
 }
 
-
+// delete all pointers in the tree from memory
 template<class T>
-void binary_search_tree<T>::delete_recursive(bst_node *node) {
+void BinarySearchTree<T>::deleteRecursive(BSTNode *node) {
 
     if (node) {
-        delete_recursive(node->left);
-        delete_recursive(node->right);
+        deleteRecursive(node->left);
+        deleteRecursive(node->right);
         delete node;
         node = NULL;
     }
@@ -148,15 +149,15 @@ void binary_search_tree<T>::delete_recursive(bst_node *node) {
 
 // iterative search find element in BST. Returns nullptr if not found
 template<class T>
-typename binary_search_tree<T>::bst_node * binary_search_tree<T>::search(T value) {
+typename BinarySearchTree<T>::BSTNode * BinarySearchTree<T>::search(T value) {
 
     // return nullptr if empty bst
-    if (root == nullptr) {
-        return root;
+    if (root_ == nullptr) {
+        return root_;
     }
 
     // create raw ptr for searching, pointing to root
-    bst_node *temp = root;
+    BSTNode *temp = root_;
 
     // iteratively search the bst
     while (value != temp->value) {
@@ -180,15 +181,15 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::search(T value
 
 // returns whether the value is in the bst or not
 template<class T>
-bool binary_search_tree<T>::contains_value(T value) {
+bool BinarySearchTree<T>::containsValue(T value) {
     return search(value) != nullptr;
 }
 
 // find node with the maximum value from the given node
 template<class T>
-typename binary_search_tree<T>::bst_node * binary_search_tree<T>::maximum(bst_node *node) {
+typename BinarySearchTree<T>::BSTNode * BinarySearchTree<T>::maximum(BSTNode *node) {
 
-    bst_node *temp = node;
+    BSTNode *temp = node;
 
     while (temp->right != nullptr) {
         temp = temp->right;
@@ -199,9 +200,9 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::maximum(bst_no
 
 // find node with the minimum value from the given root
 template<class T>
-typename binary_search_tree<T>::bst_node * binary_search_tree<T>::minimum(bst_node *node) {
+typename BinarySearchTree<T>::BSTNode * BinarySearchTree<T>::minimum(BSTNode *node) {
     
-    bst_node *temp = node;
+    BSTNode *temp = node;
 
     while (temp->left != nullptr) {
         temp = temp->left;
@@ -210,21 +211,21 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::minimum(bst_no
     return temp;
 }
 
-/* calculate the successor of a given node.
-   The successor is the node with the smallest
-   value greater than the given node.
-   (If all values are placed in order, 
-   it will be the value directly after it)   */
+// calculate the successor of a given node.
+// The successor is the node with the smallest
+// value greater than the given node.
+// (If all values are placed in order, 
+// it will be the value directly after it) 
 template<class T>
-typename binary_search_tree<T>::bst_node * binary_search_tree<T>::successor(bst_node *node) {
+typename BinarySearchTree<T>::BSTNode * BinarySearchTree<T>::successor(BSTNode *node) {
 
     // return the leftmost child of the right child
     if (node->right != nullptr) {
         return minimum(node);
     } 
 
-    bst_node *temp = node;
-    bst_node *parent_node = node->parent;
+    BSTNode *temp = node;
+    BSTNode *parent_node = node->parent;
 
     // navigate up the parent ancestor nodes
     while(parent_node != nullptr && temp == parent_node->right) {
@@ -235,21 +236,21 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::successor(bst_
     return parent_node;
 }
 
-/* calculate the predecessor of a given node.
-   The predecessor is the node with the largest
-   value smaller than the given node
-   (If all values are placed in order, 
-   it will be the value directly before it)   */
+// calculate the predecessor of a given node.
+// The predecessor is the node with the largest
+// value smaller than the given node
+// (If all values are placed in order, 
+// it will be the value directly before it)  
 template<class T>
-typename binary_search_tree<T>::bst_node * binary_search_tree<T>::predecessor(bst_node *node) {
+typename BinarySearchTree<T>::BSTNode * BinarySearchTree<T>::predecessor(BSTNode *node) {
 
     // return the rightmost child of the left child
     if (node->left != nullptr) {
         return maximum(node);
     }
     
-    bst_node *temp = node;
-    bst_node *parent_node = node->parent;
+    BSTNode *temp = node;
+    BSTNode *parent_node = node->parent;
 
     // navigate up the parent ancestor nodes
     while (parent_node != nullptr && node == parent_node->left) {
@@ -262,46 +263,46 @@ typename binary_search_tree<T>::bst_node * binary_search_tree<T>::predecessor(bs
 
 // returns the value of the maximum value in the bst
 template<class T>
-T binary_search_tree<T>::bst_max() {
-    return maximum(root)->value;
+T BinarySearchTree<T>::bstMax() {
+    return maximum(root_)->value;
 }
 
 // returns the value of the minimum value in the bst
 template<class T>
-T binary_search_tree<T>::bst_min() {
-    return minimum(root)->value;
+T BinarySearchTree<T>::bstMin() {
+    return minimum(root_)->value;
 }
 
 // inserts a new node into the bst
 template<class T>
-void binary_search_tree<T>::insert(T value) {
+void BinarySearchTree<T>::insert(T value) {
 
     // if the tree is empty just create the node
-    if (root == nullptr) {
-        root = new bst_node(value);
+    if (root_ == nullptr) {
+        root_ = new BSTNode(value);
         
     // if a root already exists
     } else {
 
-        bst_node *existing_node = search(value);
+        BSTNode *existing_node = search(value);
 
         // if the value already exists in the tree, just increment the count
         if (existing_node != nullptr) {
 
-            amount_of_nodes++;
+            amount_of_nodes_++;
             existing_node->value_count++;
 
             return;
         }
 
         // create the new node
-        bst_node* new_node = new bst_node(value);
+        BSTNode* new_node = new BSTNode(value);
         
         // set current node to root
-        bst_node* current_node = root;
+        BSTNode* current_node = root_;
 
         // keep a pointer to the previous node
-        bst_node* prev_node = nullptr;
+        BSTNode* prev_node = nullptr;
 
         // iteratively traverse the tree
         while (current_node != nullptr) {
@@ -327,12 +328,12 @@ void binary_search_tree<T>::insert(T value) {
         }
     }
 
-    amount_of_nodes++;
+    amount_of_nodes_++;
 }
 
 // helper function to replace node u with v in the bst
 template<class T>
-void binary_search_tree<T>::shift_nodes(bst_node *u, bst_node *v) {
+void BinarySearchTree<T>::shiftNodes(BSTNode *u, BSTNode *v) {
 
     if (u == nullptr) {
         return;
@@ -340,7 +341,7 @@ void binary_search_tree<T>::shift_nodes(bst_node *u, bst_node *v) {
 
     // if u is the root node, set v as the root node
     if (u->parent == nullptr) {
-        root = v;
+        root_ = v;
 
     // if u is to the left of it's parent
     } else if (u == u->parent->left) {
@@ -359,10 +360,10 @@ void binary_search_tree<T>::shift_nodes(bst_node *u, bst_node *v) {
 
 // removes node with matching value
 template<class T>
-bool binary_search_tree<T>::remove(T value) {
+bool BinarySearchTree<T>::remove(T value) {
 
     // find the node
-    bst_node *current_node = search(value);
+    BSTNode *current_node = search(value);
 
     // if value is not found, return
     if (current_node == nullptr) {
@@ -371,43 +372,43 @@ bool binary_search_tree<T>::remove(T value) {
 
     int node_occurrences = current_node->value_count;
 
-    /* make a copy of the node to be removed so we can
-       delete it from memory afterwards */
-    bst_node *copy = current_node;
+    // make a copy of the node to be removed so we can
+    // delete it from memory afterwards 
+    BSTNode *copy = current_node;
 
-    /* if the current node doesn't have a left child
-       then we can replace it with it's right child.
-       If it doesn't have a right child it gets set 
-       to nullptr, effectively removing it from the bst */
+    // if the current node doesn't have a left child
+    // then we can replace it with it's right child.
+    // If it doesn't have a right child it gets set 
+    // to nullptr, effectively removing it from the bst 
     if (current_node->left == nullptr) {
-        shift_nodes(current_node, current_node->right);
+        shiftNodes(current_node, current_node->right);
 
-    /* otherwise, if it doesn't have a right child,
-       replace it with it's left child. If it doesn't 
-       have a left child it gets set to nullptr,
-       effectively removing it from the bst        */
+    // otherwise, if it doesn't have a right child,
+    // replace it with it's left child. If it doesn't 
+    // have a left child it gets set to nullptr,
+    // effectively removing it from the bst        
     } else if (current_node->right == nullptr) {
-        shift_nodes(current_node, current_node->left);
+        shiftNodes(current_node, current_node->left);
     
-    /* if the current node has two children, then it's
-       successor takes it's position                */
+    // if the current node has two children, then it's
+    // successor takes it's position                
     } else {
         
         // find successor
-        bst_node *succ = successor(current_node);
+        BSTNode *succ = successor(current_node);
 
-        /* if the successor isn't the current 
-           nodes immediate child */
+        // if the successor isn't the current 
+        // nodes immediate child
         if (succ->parent != current_node) {
 
             // replace successor with it's right child
-            shift_nodes(succ, succ->right);
+            shiftNodes(succ, succ->right);
             succ->right = current_node->right;
             succ->right->parent = succ;
         }
 
         // replace current node with the successor
-        shift_nodes(current_node, succ);
+        shiftNodes(current_node, succ);
         succ->left = current_node->left;
         succ->left->parent = succ;
     }
@@ -416,20 +417,20 @@ bool binary_search_tree<T>::remove(T value) {
     delete copy;
     copy = NULL;
 
-    amount_of_nodes -= node_occurrences;
+    amount_of_nodes_ -= node_occurrences;
     return true;
     
 }
 
 // return how many nodes there are in the bst
 template<class T>
-int binary_search_tree<T>::node_count() {
-    return amount_of_nodes;
+int BinarySearchTree<T>::nodeCount() {
+    return amount_of_nodes_;
 }
 
 // traverse the tree in preorder fashion. Visit the node, then left, then right.
 template<class T>
-void binary_search_tree<T>::preorder_traversal(bst_node *node, std::function<void(T)> callback) {
+void BinarySearchTree<T>::preorderTraversal(BSTNode *node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
@@ -440,35 +441,35 @@ void binary_search_tree<T>::preorder_traversal(bst_node *node, std::function<voi
         // invokes elements.push_back(node->value)
         callback(node->value);
     }    
-    preorder_traversal(node->left, callback);
-    preorder_traversal(node->right, callback);
+    preorderTraversal(node->left, callback);
+    preorderTraversal(node->right, callback);
 }
 
 // traverse the tree in inorder fashion. Visit the left, then the node, then the right.
 template<class T>
-void binary_search_tree<T>::inorder_traversal(bst_node *node, std::function<void(T)> callback) {
+void BinarySearchTree<T>::inorderTraversal(BSTNode *node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
     }
 
-    inorder_traversal(node->left, callback);
+    inorderTraversal(node->left, callback);
     for (int i = 0; i < node->value_count; i++) {
         callback(node->value);
     }    
-    inorder_traversal(node->right, callback);
+    inorderTraversal(node->right, callback);
 }
 
 // traverse the tree in postorder fashion. Visit the left, then right, then the node
 template<class T>
-void binary_search_tree<T>::postorder_traversal(bst_node *node, std::function<void(T)> callback) {
+void BinarySearchTree<T>::postorderTraversal(BSTNode *node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
     }
 
-    postorder_traversal(node->left, callback);
-    postorder_traversal(node->right, callback);
+    postorderTraversal(node->left, callback);
+    postorderTraversal(node->right, callback);
     for (int i = 0; i < node->value_count; i++) {
         callback(node->value);
     }    
@@ -476,18 +477,18 @@ void binary_search_tree<T>::postorder_traversal(bst_node *node, std::function<vo
 
 // traverse the tree in preorder with a user defined lamda function
 template<class T>
-void binary_search_tree<T>::apply_preorder(std::function<void(T)> callback) {
-    preorder_traversal(root, callback);
+void BinarySearchTree<T>::applyPreorder(std::function<void(T)> callback) {
+    preorderTraversal(root_, callback);
 }
 
 // traverse the tree inorder with a user defined lamda function
 template<class T>
-void binary_search_tree<T>::apply_inorder(std::function<void(T)> callback) {
-    inorder_traversal(root, callback);
+void BinarySearchTree<T>::applyInorder(std::function<void(T)> callback) {
+    inorderTraversal(root_, callback);
 }
 
 // traverse the tree in postorder with a user defined lamda function
 template<class T>
-void binary_search_tree<T>::apply_postorder(std::function<void(T)> callback) {
-    postorder_traversal(root, callback);
+void BinarySearchTree<T>::applyPostorder(std::function<void(T)> callback) {
+    postorderTraversal(root_, callback);
 }
