@@ -1,14 +1,14 @@
 #include <vector>
 #include <iterator>
 #include <functional>
+#include <memory>
 
 template <class T>
 class BinarySearchTree {
     protected:
         
         // tree node
-        class Node {
-            public:
+        struct TreeNode {
 
             // value stored at node
             T value;
@@ -18,51 +18,41 @@ class BinarySearchTree {
             // we can have duplicates values in the tree
             int value_count;
 
-            // pointers to children and parent
-            Node *left;
-            Node *right;
-            Node *parent;
+            // pointers to children
+            std::unique_ptr<TreeNode> left;
+            std::unique_ptr<TreeNode> right;
+
+            int balance_factor;
 
             // node constructor
-            Node(T value); 
-            ~Node();
+            explicit TreeNode(T value) {
+                this->value = value;
+                value_count = 1;
+                left = nullptr;
+                right = nullptr;
+                balance_factor = 0;
+            }
         };
 
         // pointer to the root
-        Node *root_;
+        std::unique_ptr<TreeNode> root_;
 
         // number of nodes
         int amount_of_nodes_;
 
-        // searches for given balue in bst
-        Node * search(T value);
+        TreeNode * search(T value);
 
-        // calculate max value from given node
-        Node * maximum(Node *node);
+        TreeNode * maximum(std::unique_ptr<TreeNode> &node);
+        TreeNode * minimum(std::unique_ptr<TreeNode> &node);
 
-        // calculate min value from given node
-        Node * minimum(Node *node);
+        TreeNode * successor(std::unique_ptr<TreeNode> &node);
 
-        // calculate successor from given node
-        Node * successor(Node *node);
+        void recursiveInsert(std::unique_ptr<TreeNode> &node, T value);
+        bool recursiveRemove(std::unique_ptr<TreeNode> &parent, std::unique_ptr<TreeNode> &node, T value);
 
-        // calculate predescessor from given node
-        Node * predecessor(Node *node);
-
-        // helper function to replace node u with node v
-        void shiftNodes(Node *u, Node *v);
-
-        // traverses the bst in pre-order order, visiting node, left, then right. 
-        void preorderTraversal(Node *node, std::function<void(T)> callback);
-        
-        // traverses the bst inorder order, visiting the left, then the node, then right. 
-        void inorderTraversal(Node *node, std::function<void(T)> callback);
-
-        // traverses the bst in pre-order order, visiting the left, then right, then the node
-        void postorderTraversal(Node *node, std::function<void(T)> callback);
-
-        // function to recursively clear nodes from memory
-        void deleteRecursive(Node *node);
+        void preorderTraversal(std::unique_ptr<TreeNode> &node, std::function<void(T)> callback);
+        void inorderTraversal(std::unique_ptr<TreeNode> &node, std::function<void(T)> callback);
+        void postorderTraversal(std::unique_ptr<TreeNode> &node, std::function<void(T)> callback);
 
     public:
         BinarySearchTree();
@@ -94,18 +84,6 @@ class BinarySearchTree {
         
 };
 
-template<class T>
-BinarySearchTree<T>::Node::Node(T value) {
-    this->value = value;
-    value_count = 1;
-    left = nullptr;
-    right = nullptr;
-    parent = nullptr;
-}
-
-template<class T>
-BinarySearchTree<T>::Node::~Node() {}
-
 // create empty BST
 template<class T>
 BinarySearchTree<T>::BinarySearchTree() {
@@ -116,7 +94,7 @@ BinarySearchTree<T>::BinarySearchTree() {
 // create single node BST
 template<class T>
 BinarySearchTree<T>::BinarySearchTree(T value) {
-    root_ = new Node(value);
+    root_ = std::unique_ptr<TreeNode>(new TreeNode(value));
     amount_of_nodes_ = 1;
 }
 
@@ -125,7 +103,7 @@ template<class T>
 BinarySearchTree<T>::BinarySearchTree(std::vector<T> &values) {
     
     // set the node first
-    root_ = new Node(values[0]);
+    root_ = std::unique_ptr<TreeNode>(new TreeNode(values[0]));
     amount_of_nodes_ = 1;
 
     // iterate over all but first value and insert them
@@ -138,53 +116,22 @@ BinarySearchTree<T>::BinarySearchTree(std::vector<T> &values) {
 
 template<class T>
 BinarySearchTree<T>::~BinarySearchTree()
-{
-    deleteRecursive(root_);
-}
-
-// delete all pointers in the tree from memory
-template<class T>
-void BinarySearchTree<T>::deleteRecursive(Node *node) {
-
-    if (node) {
-        deleteRecursive(node->left);
-        deleteRecursive(node->right);
-        delete node;
-        node = NULL;
-    }
-
-}
+{}
 
 // iterative search find element in BST. Returns nullptr if not found
 template<class T>
-typename BinarySearchTree<T>::Node * BinarySearchTree<T>::search(T value) {
-
-    // return nullptr if empty bst
-    if (root_ == nullptr) {
-        return root_;
-    }
-
-    // create raw ptr for searching, pointing to root
-    Node *temp = root_;
-
+typename BinarySearchTree<T>::TreeNode * BinarySearchTree<T>::search(T value) {
+    
+    TreeNode* temp = root_.get();
+   
     // iteratively search the bst
-    while (value != temp->value) {
-
-        if (value < temp->value) {
-            temp = temp->left;
-        } else {
-            temp = temp->right;
-        }
-
-        // return nullptr if not found
-        if (temp == nullptr) {
-            return temp;
-        }
-        
+    while (temp != nullptr && temp->value != value)
+    {
+        temp = (value < temp->value) ? temp->left.get() : temp->right.get();
     }
 
-    // return value if found
     return temp;
+
 }
 
 // returns whether the value is in the bst or not
@@ -195,12 +142,12 @@ bool BinarySearchTree<T>::containsValue(T value) {
 
 // find node with the maximum value from the given node
 template<class T>
-typename BinarySearchTree<T>::Node * BinarySearchTree<T>::maximum(Node *node) {
+typename BinarySearchTree<T>::TreeNode * BinarySearchTree<T>::maximum(std::unique_ptr<TreeNode> &node) {
 
-    Node *temp = node;
+    TreeNode *temp = node.get();
 
-    while (temp->right != nullptr) {
-        temp = temp->right;
+    while (temp->right) {
+        temp = temp->right.get();
     }
 
     return temp;
@@ -208,12 +155,12 @@ typename BinarySearchTree<T>::Node * BinarySearchTree<T>::maximum(Node *node) {
 
 // find node with the minimum value from the given root
 template<class T>
-typename BinarySearchTree<T>::Node * BinarySearchTree<T>::minimum(Node *node) {
+typename BinarySearchTree<T>::TreeNode * BinarySearchTree<T>::minimum(std::unique_ptr<TreeNode> &node) {
     
-    Node *temp = node;
+    TreeNode *temp = node.get();
 
-    while (temp->left != nullptr) {
-        temp = temp->left;
+    while (temp->left) {
+        temp = temp->left.get();
     }
 
     return temp;
@@ -225,48 +172,41 @@ typename BinarySearchTree<T>::Node * BinarySearchTree<T>::minimum(Node *node) {
 // (If all values are placed in order, 
 // it will be the value directly after it) 
 template<class T>
-typename BinarySearchTree<T>::Node * BinarySearchTree<T>::successor(Node *node) {
+typename BinarySearchTree<T>::TreeNode * BinarySearchTree<T>::successor(std::unique_ptr<TreeNode> &node) {
 
-    // return the leftmost child of the right child
-    if (node->right != nullptr) {
-        return minimum(node);
-    } 
-
-    Node *temp = node;
-    Node *parent_node = node->parent;
-
-    // navigate up the parent ancestor nodes
-    while(parent_node != nullptr && temp == parent_node->right) {
-        temp = parent_node;
-        parent_node = parent_node->parent;
+    // base case
+    if (!node) {
+        return nullptr;
     }
 
-    return parent_node;
-}
+    TreeNode *succ = nullptr;
+    TreeNode *temp = root_.get();
 
-// calculate the predecessor of a given node.
-// The predecessor is the node with the largest
-// value smaller than the given node
-// (If all values are placed in order, 
-// it will be the value directly before it)  
-template<class T>
-typename BinarySearchTree<T>::Node * BinarySearchTree<T>::predecessor(Node *node) {
+    while (1) {
 
-    // return the rightmost child of the left child
-    if (node->left != nullptr) {
-        return maximum(node);
+        // if value is less than node, visit
+        if (node->value < temp->value) {
+
+            succ = temp;
+            temp = temp->left.get();
+        
+        } else if (node->value > temp->value) {
+            temp = temp->right.get();
+        
+        } else {
+            if (temp->right) {
+                succ = minimum(temp->right);
+            }
+            break;
+        }
+
+        if (temp == nullptr) {
+            return succ;
+        }
     }
-    
-    Node *temp = node;
-    Node *parent_node = node->parent;
 
-    // navigate up the parent ancestor nodes
-    while (parent_node != nullptr && node == parent_node->left) {
-        temp = parent_node;
-        parent_node = parent_node->parent;
-    }
+    return succ;
 
-    return parent_node;
 }
 
 // returns the value of the maximum value in the bst
@@ -283,150 +223,99 @@ T BinarySearchTree<T>::bstMin() {
 
 // inserts a new node into the bst
 template<class T>
-void BinarySearchTree<T>::insert(T value) {
-
-    // if the tree is empty just create the node
-    if (root_ == nullptr) {
-        root_ = new Node(value);
+void BinarySearchTree<T>::recursiveInsert(std::unique_ptr<TreeNode> &node, T value) {
+    
+    if (value < node->value) {
         
-    // if a root already exists
-    } else {
-
-        Node *existing_node = search(value);
-
-        // if the value already exists in the tree, just increment the count
-        if (existing_node != nullptr) {
-
+        if (!node->left) {
+            node->left = std::unique_ptr<TreeNode>(new TreeNode(value));
             amount_of_nodes_++;
-            existing_node->value_count++;
-
-            return;
-        }
-
-        // create the new node
-        Node* new_node = new Node(value);
-        
-        // set current node to root
-        Node* current_node = root_;
-
-        // keep a pointer to the previous node
-        Node* prev_node = nullptr;
-
-        // iteratively traverse the tree
-        while (current_node != nullptr) {
-
-            prev_node = current_node;
-
-            // lower values to the left, higher values to the right
-            if (value < current_node->value) {
-                current_node = current_node->left;
-            } else {
-                current_node = current_node->right;
-            }
-        }
-
-        // assign the pointer to the parent
-        new_node->parent = prev_node;
-
-        // create pointer to current node for parent
-        if (value < prev_node->value) {
-            prev_node->left = new_node;
         } else {
-            prev_node->right = new_node;
+            recursiveInsert(node->left, value);
         }
+    } else if (value > node->value) {
+        if (!node->right) {
+            node->right = std::unique_ptr<TreeNode>(new TreeNode(value));
+            amount_of_nodes_++;
+        } else {
+            recursiveInsert(node->right, value);
+        }
+    } else {
+        
+        node->value_count++;
+        amount_of_nodes_++;
     }
 
-    amount_of_nodes_++;
 }
 
-// helper function to replace node u with v in the bst
 template<class T>
-void BinarySearchTree<T>::shiftNodes(Node *u, Node *v) {
+void BinarySearchTree<T>::insert(T value) {
+    recursiveInsert(root_, value);
+}
 
-    if (u == nullptr) {
-        return;
-    }
-
-    // if u is the root node, set v as the root node
-    if (u->parent == nullptr) {
-        root_ = v;
-
-    // if u is to the left of it's parent
-    } else if (u == u->parent->left) {
-        u->parent->left = v;
-    // if u is to the right of it's parent
-    } else {
-        u->parent->right = v;
-    }
-    
-    // make u's parent v's parent
-    if (v != nullptr) {
-        v->parent = u->parent;
-    }
-    
+template<class T>
+bool BinarySearchTree<T>::remove(T value) {
+    return recursiveRemove(root_, root_, value);
 }
 
 // removes node with matching value
 template<class T>
-bool BinarySearchTree<T>::remove(T value) {
+bool BinarySearchTree<T>::recursiveRemove(std::unique_ptr<TreeNode> &parent, std::unique_ptr<TreeNode> &node, T value) {
 
-    // find the node
-    Node *current_node = search(value);
-
-    // if value is not found, return
-    if (current_node == nullptr) {
+    if (!node) {
         return false;
     }
 
-    int node_occurrences = current_node->value_count;
+    int node_occurrences = node->value_count;
 
-    // make a copy of the node to be removed so we can
-    // delete it from memory afterwards 
-    Node *copy = current_node;
+    if (node->value == value) {
 
-    // if the current node doesn't have a left child
-    // then we can replace it with it's right child.
-    // If it doesn't have a right child it gets set 
-    // to nullptr, effectively removing it from the bst 
-    if (current_node->left == nullptr) {
-        shiftNodes(current_node, current_node->right);
+        // if 2 children
+        if (node->left && node->right) {
+            T successor_val = successor(node)->value;
+            recursiveRemove(root_, root_, successor_val);
+            node->value = successor_val; 
+            
+        // if 1 child
+        } else if (node->left || node->right) {
+            
+            // pointer to whichever child exists
+            std::unique_ptr<TreeNode> &child = node->left ? node->left : node->right;
 
-    // otherwise, if it doesn't have a right child,
-    // replace it with it's left child. If it doesn't 
-    // have a left child it gets set to nullptr,
-    // effectively removing it from the bst        
-    } else if (current_node->right == nullptr) {
-        shiftNodes(current_node, current_node->left);
-    
-    // if the current node has two children, then it's
-    // successor takes it's position                
-    } else {
+            if (node == root_) {
+                root_ = std::move(child);
+            } else if (value < parent->value) {
+                parent->left = std::move(child);
+            } else {
+                parent->right = std::move(child);
+            }
+
+            amount_of_nodes_ -= node_occurrences;
         
-        // find successor
-        Node *succ = successor(current_node);
+        // if no children (leaf node)
+        } else {
+            if (node == root_) {
+                root_.reset(nullptr);
+            
+            } else if (value < parent->value) {
+                parent->left.reset(nullptr);
+            } else {
+                parent->right.reset(nullptr);
+            }
 
-        // if the successor isn't the current 
-        // nodes immediate child
-        if (succ->parent != current_node) {
-
-            // replace successor with it's right child
-            shiftNodes(succ, succ->right);
-            succ->right = current_node->right;
-            succ->right->parent = succ;
+            amount_of_nodes_ -= node_occurrences;
         }
 
-        // replace current node with the successor
-        shiftNodes(current_node, succ);
-        succ->left = current_node->left;
-        succ->left->parent = succ;
+        return true;
+
+    } else if (value < node->value) {
+        recursiveRemove(node, node->left, value);
+    } else {
+        
+        recursiveRemove(node, node->right, value);
     }
 
-    // delete the node from memory
-    delete copy;
-    copy = NULL;
-
-    amount_of_nodes_ -= node_occurrences;
-    return true;
+    return false;
     
 }
 
@@ -438,7 +327,7 @@ int BinarySearchTree<T>::nodeCount() {
 
 // traverse the tree in preorder fashion. Visit the node, then left, then right.
 template<class T>
-void BinarySearchTree<T>::preorderTraversal(Node *node, std::function<void(T)> callback) {
+void BinarySearchTree<T>::preorderTraversal(std::unique_ptr<TreeNode> &node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
@@ -455,7 +344,7 @@ void BinarySearchTree<T>::preorderTraversal(Node *node, std::function<void(T)> c
 
 // traverse the tree in inorder fashion. Visit the left, then the node, then the right.
 template<class T>
-void BinarySearchTree<T>::inorderTraversal(Node *node, std::function<void(T)> callback) {
+void BinarySearchTree<T>::inorderTraversal(std::unique_ptr<TreeNode> &node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
@@ -470,7 +359,7 @@ void BinarySearchTree<T>::inorderTraversal(Node *node, std::function<void(T)> ca
 
 // traverse the tree in postorder fashion. Visit the left, then right, then the node
 template<class T>
-void BinarySearchTree<T>::postorderTraversal(Node *node, std::function<void(T)> callback) {
+void BinarySearchTree<T>::postorderTraversal(std::unique_ptr<TreeNode> &node, std::function<void(T)> callback) {
 
     if (node == nullptr) {
         return;
